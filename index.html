@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>偏导数图解 · A Pictorial Treatise on Partial Derivatives</title>
+<meta name="description" content="偏导数、梯度、方向导数与全微分的交互式图解">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f3ecdc'/%3E%3Cpath d='M5 25c7 0 9-17 15-17' stroke='%23241f1a' stroke-width='1.7' fill='none'/%3E%3Cpath d='M5 25h22' stroke='%23241f1a' stroke-width='1.1'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./styles/plate.css">
+</head>
+<body class="lang-zh">
+
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<div class="app" id="app">
+
+  <!-- ======================= MASTHEAD 刊头 ======================= -->
+  <header class="masthead">
+    <div class="rule rule--single"></div>
+    <div class="masthead__row">
+      <div class="masthead__flourish" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="34" height="34" role="presentation">
+          <g fill="none" stroke="currentColor" stroke-width="1">
+            <circle cx="32" cy="32" r="4.2"/>
+            <path d="M32 6c8 8 8 18 0 26-8-8-8-18 0-26Z"/>
+            <path d="M32 58c-8-8-8-18 0-26 8 8 8 18 0 26Z"/>
+            <path d="M6 32c8-8 18-8 26 0-8 8-18 8-26 0Z"/>
+            <path d="M58 32c-8 8-18 8-26 0 8-8 18-8 26 0Z"/>
+          </g>
+        </svg>
+      </div>
+      <div class="masthead__titles">
+        <h1 class="masthead__cn">偏导数图解</h1>
+        <p class="masthead__en">A PICTORIAL TREATISE ON PARTIAL DERIVATIVES</p>
+      </div>
+      <div class="masthead__tools">
+        <button class="btn btn--ghost" id="langBtn" type="button" title="中文 / English" aria-label="切换语言 / Switch language">
+          <span class="btn__caps">EN</span>
+        </button>
+        <button class="btn btn--ghost" id="exportBtn" type="button">
+          <span data-lang="zh">导出图版</span><span data-lang="en">Export</span>
+        </button>
+        <button class="btn btn--square" id="helpBtn" type="button" aria-label="帮助 / Help">?</button>
+      </div>
+    </div>
+    <p class="masthead__sub">
+      <span data-lang="zh"></span>
+      <span data-lang="en">Reducing the differential calculus of several variables to figures that may be seen; drag to turn, and every quantity is put by hand.</span>
+    </p>
+    <p class="masthead__imprint">
+    </p>
+    <div class="rule rule--double"></div>
+  </header>
+
+  <!-- ======================= PLATE TABS 章节 ======================= -->
+  <nav class="plates" id="plates" role="tablist" aria-label="章节 / Chapters">
+    <button class="plate-tab is-active" role="tab" data-chapter="1" type="button" aria-selected="true">
+      <span class="plate-tab__num">PLATE I</span>
+      <span class="plate-tab__zh">偏导数</span>
+      <span class="plate-tab__en">Partial Derivatives</span>
+    </button>
+    <button class="plate-tab" role="tab" data-chapter="2" type="button" aria-selected="false">
+      <span class="plate-tab__num">PLATE II</span>
+      <span class="plate-tab__zh">梯度</span>
+      <span class="plate-tab__en">The Gradient</span>
+    </button>
+    <button class="plate-tab" role="tab" data-chapter="3" type="button" aria-selected="false">
+      <span class="plate-tab__num">PLATE III</span>
+      <span class="plate-tab__zh">方向导数</span>
+      <span class="plate-tab__en">Directional Derivative</span>
+    </button>
+    <button class="plate-tab" role="tab" data-chapter="4" type="button" aria-selected="false">
+      <span class="plate-tab__num">PLATE IV</span>
+      <span class="plate-tab__zh">切平面与全微分</span>
+      <span class="plate-tab__en">Tangent Plane &amp; Total Differential</span>
+    </button>
+  </nav>
+
+  <!-- ======================= WORKBENCH 工作台 ======================= -->
+  <main class="workbench">
+
+    <!-- ---------- LEFT: INSTRUMENT PANEL 仪器面板 ---------- -->
+    <aside class="panel" id="panel" aria-label="仪器 / Instruments">
+      <div class="panel__head">
+        <span class="panel__title"><span data-lang="zh">仪器</span><span data-lang="en">INSTRUMENTS</span></span>
+        <button class="btn btn--tiny" id="resetBtn" type="button">
+          <span data-lang="zh">复位</span><span data-lang="en">Reset</span>
+        </button>
+      </div>
+
+      <details class="group" open>
+        <summary>
+          <span class="group__mark" aria-hidden="true"></span>
+          <span class="group__title"><span data-lang="zh">曲面</span><span data-lang="en">Surface</span></span>
+        </summary>
+        <div class="group__body">
+          <label class="field">
+            <span class="field__label"><span data-lang="zh">函数族</span><span data-lang="en">Family</span></span>
+            <span class="selectwrap">
+              <select id="famSelect" class="select" aria-label="函数族 / Function family"></select>
+            </span>
+          </label>
+          <div id="paramSliders" class="sliders"></div>
+          <div class="field field--slider" id="fieldCustom" hidden>
+            <label class="field__label" for="customExpr">
+              <span data-lang="zh">自定义表达式 <i>f</i>(<i>x</i>,<i>y</i>)</span>
+              <span data-lang="en">Custom <i>f</i>(<i>x</i>,<i>y</i>)</span>
+            </label>
+            <input class="input" id="customExpr" type="text" spellcheck="false" autocomplete="off"
+                   value="p*x^2 - q*y^2" aria-describedby="customErr">
+            <p class="field__err" id="customErr" role="status"></p>
+          </div>
+          <div class="field field--slider">
+            <span class="field__label"><span data-lang="zh">定义域 ±<i>L</i></span><span data-lang="en">Domain ±<i>L</i></span></span>
+            <input class="range" id="rangeL" type="range" min="1" max="5" step="0.1" value="2">
+            <output class="field__value" id="outL">2.0</output>
+          </div>
+          <div class="field field--slider">
+            <span class="field__label"><span data-lang="zh">纵轴比例 <i>z</i>×</span><span data-lang="en">Vertical <i>z</i>×</span></span>
+            <input class="range" id="rangeZ" type="range" min="0.2" max="2.5" step="0.05" value="1">
+            <output class="field__value" id="outZ">1.00</output>
+          </div>
+          <div class="field">
+            <span class="field__label"><span data-lang="zh">网格密度</span><span data-lang="en">Mesh</span></span>
+            <span class="selectwrap">
+              <select id="meshSelect" class="select" aria-label="网格密度 / Mesh density">
+                <option value="40">40 × 40</option>
+                <option value="64" selected>64 × 64</option>
+                <option value="96">96 × 96</option>
+                <option value="128">128 × 128</option>
+              </select>
+            </span>
+          </div>
+          <p class="note" id="famNote"></p>
+        </div>
+      <details class="group" open>
+        <summary>
+          <span class="group__mark" aria-hidden="true"></span>
+          <span class="group__title"><span data-lang="zh">图层</span><span data-lang="en">Layers</span></span>
+        </summary>
+        <div class="group__body">
+          <div id="layerToggles" class="checks"></div>
+        </div>
+      </details>
+
+      <details class="group" open>
+        <summary>
+          <span class="group__mark" aria-hidden="true"></span>
+          <span class="group__title"><span data-lang="zh">油墨</span><span data-lang="en">Inks</span></span>
+        </summary>
+        <div class="group__body">
+          <div class="inks">
+            <button class="inkbtn" type="button" data-preset="copper"><span class="inkbtn__chip" style="--c1:#d8b477;--c2:#6b4a2a;--c3:#8a3b2e"></span><span data-lang="zh">铜版棕</span><span data-lang="en">Copperplate</span></button>
+            <button class="inkbtn" type="button" data-preset="prussian"><span class="inkbtn__chip" style="--c1:#b9cbd6;--c2:#2e4a5c;--c3:#9a6a2f"></span><span data-lang="zh">普鲁士蓝</span><span data-lang="en">Prussian</span></button>
+            <button class="inkbtn" type="button" data-preset="vermilion"><span class="inkbtn__chip" style="--c1:#e6c4a2;--c2:#8a3b2e;--c3:#2e4a5c"></span><span data-lang="zh">朱墨本</span><span data-lang="en">Vermilion</span></button>
+          </div>
+          <div id="colorFields" class="colorfields"></div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary>
+          <span class="group__mark" aria-hidden="true"></span>
+          <span class="group__title"><span data-lang="zh">视图与演示</span><span data-lang="en">View &amp; Demo</span></span>
+        </summary>
+        <div class="group__body">
+          <div class="field field--slider">
+            <span class="field__label"><span data-lang="zh">版画排线</span><span data-lang="en">Engraving hatch</span></span>
+            <input class="range" id="rangeHatch" type="range" min="0" max="1" step="0.05" value="0.45">
+            <output class="field__value" id="outHatch">0.45</output>
+          </div>
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="swayChk"><span class="check__box" aria-hidden="true"></span><span class="check__text"><span data-lang="zh">参数摆动演示</span><span data-lang="en">Sway the parameter</span></span></label>
+            <label class="check"><input type="checkbox" id="spinChk"><span class="check__box" aria-hidden="true"></span><span class="check__text"><span data-lang="zh">视角自动缓转</span><span data-lang="en">Slow orbit</span></span></label>
+          </div>
+          <button class="btn btn--wide" id="camResetBtn" type="button">
+            <span data-lang="zh">复位视角</span><span data-lang="en">Reset the view</span>
+          </button>
+          <p class="note">
+            <span data-lang="zh">快捷键：<b>1–4</b> 换章 · <b>R</b> 复位 · <b>空格</b> 摆动 · <b>L</b> 语言</span>
+            <span data-lang="en">Keys: <b>1–4</b> plates · <b>R</b> reset · <b>Space</b> sway · <b>L</b> language</span>
+          </p>
+        </div>
+      </details>
+    </aside>
+
+    <!-- ---------- CENTRE: STAGE 三维舞台 ---------- -->
+    <section class="stage" id="stage">
+      <canvas id="gl" class="stage__canvas" aria-label="三维曲面 / 3D surface"></canvas>
+      <div class="stage__labels" id="labels" aria-hidden="true"></div>
+      <div class="stage__badge" id="engineTag">ENGINE · —</div>
+      <div class="stage__hint" id="hint">
+        <span data-lang="zh" class="hint-fine"><b>拖动</b>旋转 · <b>滚轮</b>缩放 · <b>双击</b>复位 · <b>拖动红钉</b>移动取点</span>
+        <span data-lang="en" class="hint-fine"><b>Drag</b> to orbit · <b>Scroll</b> to zoom · <b>Double-click</b> to reset · <b>drag the pin</b> to move the point</span>
+        <span data-lang="zh" class="hint-coarse"><b>单指</b>旋转 · <b>双指</b>缩放 · <b>双击</b>复位 · <b>拖动红钉</b>移动取点</span>
+        <span data-lang="en" class="hint-coarse"><b>One finger</b> orbits · <b>two fingers</b> zoom · <b>double-tap</b> to reset · <b>drag the pin</b> to move the point</span>
+      </div>
+      <div class="stage__frame" aria-hidden="true"></div>
+    </section>
+
+    <!-- ---------- RIGHT: FIGURE PLATE 图版 ---------- -->
+    <aside class="plate-col">
+      <figure class="figure">
+        <div class="figure__head">
+          <span class="figure__num" id="figNum">FIG. 1.</span>
+          <span class="figure__title" id="figTitle"></span>
+        </div>
+        <div class="figure__canvas"><canvas id="fig" aria-label="图版 / Figure plate"></canvas></div>
+        <figcaption class="figure__note" id="figNote"></figcaption>
+      </figure>
+      <div class="readouts" id="readouts"></div>
+    </aside>
+  </main>
+
+  <!-- ======================= COMMENTARY 释文 ======================= -->
+  <section class="commentary" id="commentary" aria-live="polite">
+
+    <article class="prose" data-chapter-content="1">
+      <p class="lead" data-lang="zh">设 <i>z</i> = <i>f</i>(<i>x</i>, <i>y</i>) 为一曲面。把 <i>y</i> 冻结在 <i>y</i>₀，以平面 <i>y</i> = <i>y</i>₀ 切下，曲面上便留出一条曲线 <i>C<sub>x</sub></i>；沿此曲线行走，高度只随 <i>x</i> 一个变量改变。这条曲线在 <i>P</i> 点的切线斜率，即 <i>f</i> 对 <i>x</i> 的偏导数。同理冻结 <i>x</i>，得 <i>C<sub>y</sub></i> 与 ∂<i>f</i>/∂<i>y</i>。几何上，偏导数就是沿坐标轴方向的坡度：在图上恰是那个斜率三角的高与底之比。</p>
+      <p class="lead" data-lang="en">Let <i>z</i> = <i>f</i>(<i>x</i>, <i>y</i>) be a surface. Freeze <i>y</i> at <i>y</i>₀ and cut with the plane <i>y</i> = <i>y</i>₀: the surface retains a curve <i>C<sub>x</sub></i> along which the height varies with <i>x</i> alone. The slope of its tangent at <i>P</i> is the partial derivative of <i>f</i> with respect to <i>x</i>. Freezing <i>x</i> in like manner gives <i>C<sub>y</sub></i> and ∂<i>f</i>/∂<i>y</i>. Geometrically a partial derivative is a gradient measured along one coordinate axis — precisely the rise over the run of the little slope triangle drawn upon the curve.</p>
+      <div class="display-formula">
+        <span class="frac"><span class="num">∂<i>f</i></span><span class="den">∂<i>x</i></span></span>
+        (<i>x</i>₀, <i>y</i>₀) =
+        lim<sub><i>h</i>→0</sub>
+        <span class="frac"><span class="num"><i>f</i>(<i>x</i>₀+<i>h</i>, <i>y</i>₀) − <i>f</i>(<i>x</i>₀, <i>y</i>₀)</span><span class="den"><i>h</i></span></span>
+      </div>
+      <p data-lang="zh"><span class="marginal">注</span>在马鞍面上，两个方向于原点处的坡度反号：一个上坡，一个下坡。这正是偏导数只看得见“一条线”的证据——离开这条线，它一无所知。</p>
+      <p data-lang="en"><span class="marginal">Note</span>On a saddle the two slopes at the origin have opposite signs: one climbs, one falls. This is the witness that a partial derivative sees only a single line — away from that line it knows nothing.</p>
+      <p class="tryit" data-lang="zh"><b>试一试</b> —— 拖动舞台上的红色图钉，看斜率三角如何翻转符号；再把 <i>a</i> 与 <i>b</i> 调得不相等，两方向便不再对称。</p>
+      <p class="tryit" data-lang="en"><b>Try this</b> — drag the red pin across the stage and watch the slope triangle change sign; then set <i>a</i> and <i>b</i> unequal and the two directions lose their symmetry.</p>
+    </article>
+
+    <article class="prose" data-chapter-content="2" hidden>
+      <p class="lead" data-lang="zh">把两个偏导数并排收入一个向量，便得梯度 ∇<i>f</i> = (∂<i>f</i>/∂<i>x</i>, ∂<i>f</i>/∂<i>y</i>)。在等高线图上，梯度恒垂直于过该点的等值线，并指向函数增长最速的一方；其长度 |∇<i>f</i>| 就是那一方的上升率。两个偏导数，不过是梯度在两根坐标轴上的投影。</p>
+      <p class="lead" data-lang="en">Gather the two partial derivatives into one vector and you have the gradient, ∇<i>f</i> = (∂<i>f</i>/∂<i>x</i>, ∂<i>f</i>/∂<i>y</i>). Upon a contour map the gradient stands always perpendicular to the level curve through the point, and points the way of steepest ascent; its length |∇<i>f</i>| is the rate of that ascent. The two partial derivatives are merely its projections upon the axes.</p>
+      <div class="display-formula">∇<i>f</i> ⟂ { <i>f</i> = const } ,&nbsp;&nbsp; |∇<i>f</i>| = max<sub>|<b>u</b>|=1</sub> <i>D</i><sub><b>u</b></sub><i>f</i></div>
+      <p data-lang="zh"><span class="marginal">注</span>把参数 <i>a</i> 调到零，马鞍面退化为一片平原，等高线由双曲线族骤然摊成平行直线——退化过程本身即是一课。</p>
+      <p data-lang="en"><span class="marginal">Note</span>Drive the parameter <i>a</i> to zero and the saddle collapses into a plain; the hyperbolas of the level sets flatten abruptly into parallel lines. The degeneracy is itself the lesson.</p>
+      <p class="tryit" data-lang="zh"><b>试一试</b> —— 拖动舞台，从正上方俯视等高线；再让取点沿着一条等值线滑动，箭头始终与之垂直。</p>
+      <p class="tryit" data-lang="en"><b>Try this</b> — orbit the stage to look straight down upon the contours; then slide the point along one level curve and see the arrow keep its right angle.</p>
+    </article>
+
+    <article class="prose" data-chapter-content="3" hidden>
+      <p class="lead" data-lang="zh">若不定沿坐标轴行走，而以单位向量 <b>u</b> = (cos θ, sin θ) 为方向，过 <i>P</i> 作含 <b>u</b> 的竖直平面，同样切出一条曲线；其切线斜率即方向导数。它对 <b>u</b> 是线性的：只要记住两个偏导数，任意方向的坡率便可算出。</p>
+      <p class="lead" data-lang="en">Should we walk not along an axis but along a unit vector <b>u</b> = (cos θ, sin θ), a vertical plane through <i>P</i> containing <b>u</b> cuts yet another curve, and the slope of its tangent is the directional derivative. It is linear in <b>u</b>: knowing the two partials, the slope in any direction whatever may be computed.</p>
+      <div class="display-formula"><i>D</i><sub><b>u</b></sub><i>f</i> = ∇<i>f</i> · <b>u</b> = <i>f<sub>x</sub></i> cos θ + <i>f<sub>y</sub></i> sin θ</div>
+      <p data-lang="zh"><span class="marginal">注</span>作为 θ 的函数，这是一条余弦曲线；若以极坐标作图，便是一个过原点的圆——图版中那朵“玫瑰”。半径最长处正是 ∇<i>f</i> 的方向；与 ∇<i>f</i> 垂直时半径为零，即沿等高线行走，高度不变。</p>
+      <p data-lang="en"><span class="marginal">Note</span>As a function of θ this is a cosine; drawn in polar coordinates it is a circle through the origin — the “rose” upon the plate. The longest radius falls upon the direction of ∇<i>f</i>; where <b>u</b> is perpendicular to it the radius vanishes, for walking along a level curve changes no height.</p>
+      <p class="tryit" data-lang="zh"><b>试一试</b> —— 拨动角度指针，让玫瑰图上的半径伸到最长，再转九十度，看它缩为零。</p>
+      <p class="tryit" data-lang="en"><b>Try this</b> — turn the needle until the radius of the rose is longest, then turn a further ninety degrees and watch it fall to nothing.</p>
+    </article>
+
+    <article class="prose" data-chapter-content="4" hidden>
+      <p class="lead" data-lang="zh">若 <i>f</i> 在 <i>P</i> 处可微，则曲面在该点附近可由一张切平面逼近。切平面给出的高度变化 <i>dz</i> = <i>f<sub>x</sub></i> <i>dx</i> + <i>f<sub>y</sub></i> <i>dy</i> 称为全微分；真实的变化 Δ<i>z</i> 与之相差一个比 √(<i>dx</i>²+<i>dy</i>²) 更高阶的小量。两个偏导数，正是这一线性逼近的两个系数——这便是它们在工程近似中无处不在的缘故。</p>
+      <p class="lead" data-lang="en">If <i>f</i> be differentiable at <i>P</i>, the surface near that point is approximated by a tangent plane. The change of height it predicts, <i>dz</i> = <i>f<sub>x</sub></i> <i>dx</i> + <i>f<sub>y</sub></i> <i>dy</i>, is called the total differential; the true change Δ<i>z</i> differs from it by a quantity of higher order than √(<i>dx</i>²+<i>dy</i>²). The two partial derivatives are the coefficients of this linear approximation — whence their ubiquity in every art of approximation.</p>
+      <div class="display-formula"><i>z</i> = <i>f</i>(<i>P</i>) + <i>f<sub>x</sub></i>(<i>x</i>−<i>x</i>₀) + <i>f<sub>y</sub></i>(<i>y</i>−<i>y</i>₀) &nbsp;;&nbsp; Δ<i>z</i> − <i>dz</i> = <i>o</i>(‖Δ<b>p</b>‖)</div>
+      <p data-lang="zh"><span class="marginal">注</span>切平面与曲面之间的缝隙，就是“可微”一词的度量：缝隙相对于步长趋于零，切平面才配称为逼近。</p>
+      <p data-lang="en"><span class="marginal">Note</span>The gap between plane and surface is the very measure of differentiability: only when the gap shrinks faster than the step may the plane be called an approximation.</p>
+      <p class="tryit" data-lang="zh"><b>试一试</b> —— 拖动 (Δ<i>x</i>, Δ<i>y</i>) 手柄，把步长一点点收小，看读数栏里的误差比率如何趋于零。</p>
+      <p class="tryit" data-lang="en"><b>Try this</b> — drag the (Δ<i>x</i>, Δ<i>y</i>) handle and shrink the step by degrees; watch the error ratio in the ledger fall away to nothing.</p>
+    </article>
+  </section>
+
+  <footer class="colophon">
+    <span class="colophon__left">偏导数图解 · <i>A Pictorial Treatise on Partial Derivatives</i></span>
+    <span class="colophon__mid" id="colophonState">—</span>
+    <span class="colophon__right" id="engineFoot">—</span>
+  </footer>
+</div>
+
+<script src="./js/i18n.js"></script>
+<script src="./js/mathcore.js"></script>
+<script src="./js/families.js"></script>
+<script src="./js/render/scene.js"></script>
+<script src="./js/render/webgpu.js"></script>
+<script src="./js/render/webgl2.js"></script>
+<script src="./js/render/index.js"></script>
+<script src="./js/charts.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/selftest.js"></script>
+</body>
+</html>
